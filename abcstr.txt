@@ -1,0 +1,46 @@
+1.Insall the dependencies--
+sudo yum install automake fuse fuse-devel gcc-c++ git libcurl-devel libxml2-devel make openssl-devel
+
+2.Clone s3fs source code from git
+git clone https://github.com/s3fs-fuse/s3fs-fuse.git
+
+3.Install the code
+cd s3fs-fuse
+./autogen.sh
+./configure --prefix=/usr --with-openssl
+make
+sudo make install
+
+4. Check the s3fs command and installation
+which s3fs
+
+5. Getting the access key and secret key.
+****You will need an AWS Access key and Secret key with appropriate permissions in order to access your s3 bucket from your EC2 instance.
+-Create an IAM user with S3 full access
+-Go to AWS Menu -> Your AWS Account Name -> My Security Credentials. Here your IAM console will appear.
+-Now go to the Security Credentials Tab and Create an Access Key.
+
+6.Paste the access key and secret key 
+touch /etc/passwd-s3fs
+vim /etc/passwd-s3fs
+
+(Your_accesskey:Your_secretkey)  --- inside
+
+7. Change the permission of the file
+sudo chmod 640 /etc/passwd-s3fs
+
+8. Mount S3 bucket
+mkdir /mys3bucket
+s3fs your_bucketname -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 /mys3bucket
+
+you can make an entry in /etc/rc.local to automatically remount after reboot.  Find the s3fs binary file by the “which” command and make the entry before the “exit 0” line as below.
+which s3fs
+/usr/local/bin/s3fs
+nano /etc/rc.local
+/usr/local/bin/s3fs your_bucketname -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 /mys3bucket
+
+
+
+
+
+
