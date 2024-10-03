@@ -1,0 +1,49 @@
+---
+- name: configuring apache with handler
+  hosts: all
+  tasks:
+        - name: installed httpd
+          yum:
+               name: httpd
+               state: latest
+        - name: copied httpd.conf file on target server
+          copy:
+               src: httpd.conf
+               dest: /etc/httpd/conf/httpd.conf
+        - name: copied index.html file
+          copy:
+               src: index.html
+               dest: /var/www/html/index.html
+        - name: restart the httpd services
+          systemd:
+               name: httpd
+               state: restarted
+               enabled: true
+        - name: installed firewallld
+          dnf:
+               name: firewalld
+               state: present
+        - name: configure firewalld
+          firewalld:
+               service: http
+               permanent: yes
+               state: enabled
+               immediate: true
+        - name: start and enable firewall service
+          systemd:
+               name: firewalld
+               state: started
+               enabled: yes
+        - name: allow port in firewall
+          firewalld:
+               port: 82/tcp
+               permanent: yes
+               state: enabled
+               immediate: true
+ 
+  handlers:
+        - name: restart_httpd
+          service:
+               name: httpd
+               state: restarted
+               enabled: true
